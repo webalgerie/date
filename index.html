@@ -1,47 +1,85 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Calcul entre deux dates</title>
-  <style>
-    body { font-family: Arial; background: #fff8cc; }
-    .box { background: #eaffd0; padding: 15px; width: 500px; border: 1px solid green; }
-    select, button { margin: 5px; }
-  </style>
+<meta charset="UTF-8">
+<title>Calcul entre deux dates</title>
+
+<style>
+body { font-family: Arial; background:#fff8cc; }
+.box { background:#eaffd0; padding:15px; width:500px; border:1px solid green; }
+select, button { margin:4px; }
+</style>
 </head>
+
 <body>
 
 <h2>Nombre de jours entre deux dates</h2>
 
 <div class="box">
-  <p>Date de début :</p>
-  Jour <select id="d1"></select>
-  Mois <select id="m1"></select>
-  Année <select id="y1"></select>
+<b>Date de début :</b><br>
+Jour <select id="jour1"></select>
+Mois <select id="mois1"></select>
+Année <select id="annee1"></select>
 
-  <p>Date de fin :</p>
-  Jour <select id="d2"></select>
-  Mois <select id="m2"></select>
-  Année <select id="y2"></select>
+<br><br>
 
-  <br><br>
-  <button onclick="calculer()">Calculer</button>
+<b>Date de fin :</b><br>
+Jour <select id="jour2"></select>
+Mois <select id="mois2"></select>
+Année <select id="annee2"></select>
 
-  <p id="resultat"></p>
+<br><br>
+<button onclick="calculer()">Calculer</button>
+
+<p id="resultat"></p>
 </div>
 
 <script>
-  function remplirSelect(id, debut, fin) {
-    let s = document.getElementById(id);
-    for (let i = debut; i <= fin; i++) {
-      let o = document.createElement("option");
-      o.value = i;
-      o.text = i;
-      s.appendChild(o);
-    }
+function remplir(id, debut, fin){
+  let s = document.getElementById(id);
+  for(let i=debut;i<=fin;i++){
+    let o=document.createElement("option");
+    o.value=i; o.text=i;
+    s.appendChild(o);
   }
+}
 
-  function remplirMois(id) {
-    const mois = ["Janvier","Février","Mars","Avril","Mai","Juin",
-                  "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-    let s = document.get
+function remplirMois(id){
+  let mois=["Janvier","Février","Mars","Avril","Mai","Juin",
+            "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  let s=document.getElementById(id);
+  mois.forEach((m,i)=>{
+    let o=document.createElement("option");
+    o.value=i; o.text=m;
+    s.appendChild(o);
+  });
+}
+
+remplir("jour1",1,31);
+remplir("jour2",1,31);
+remplir("annee1",2000,2035);
+remplir("annee2",2000,2035);
+remplirMois("mois1");
+remplirMois("mois2");
+
+function calculer(){
+  let d1=new Date(
+    document.getElementById("annee1").value,
+    document.getElementById("mois1").value,
+    document.getElementById("jour1").value
+  );
+
+  let d2=new Date(
+    document.getElementById("annee2").value,
+    document.getElementById("mois2").value,
+    document.getElementById("jour2").value
+  );
+
+  let diff=Math.abs(d2-d1)/(1000*60*60*24);
+  document.getElementById("resultat").innerText=
+    "Il s'est écoulé "+diff+" jour(s).";
+}
+</script>
+
+</body>
+</html>
