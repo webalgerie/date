@@ -3,37 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Calcul entre deux dates</title>
+  <style>
+    body { font-family: Arial; background: #fff8cc; }
+    .box { background: #eaffd0; padding: 15px; width: 500px; border: 1px solid green; }
+    select, button { margin: 5px; }
+  </style>
 </head>
 <body>
-  <h2>Nombre de jours entre deux dates</h2>
 
-  <label>Date de début :</label>
-  <input type="date" id="startDate"><br><br>
+<h2>Nombre de jours entre deux dates</h2>
 
-  <label>Date de fin :</label>
-  <input type="date" id="endDate"><br><br>
+<div class="box">
+  <p>Date de début :</p>
+  Jour <select id="d1"></select>
+  Mois <select id="m1"></select>
+  Année <select id="y1"></select>
 
+  <p>Date de fin :</p>
+  Jour <select id="d2"></select>
+  Mois <select id="m2"></select>
+  Année <select id="y2"></select>
+
+  <br><br>
   <button onclick="calculer()">Calculer</button>
 
   <p id="resultat"></p>
+</div>
 
-  <script>
-    function calculer() {
-      const debut = new Date(document.getElementById("startDate").value);
-      const fin = new Date(document.getElementById("endDate").value);
-
-      if (isNaN(debut) || isNaN(fin)) {
-        document.getElementById("resultat").innerText =
-          "Veuillez sélectionner deux dates.";
-        return;
-      }
-
-      const diffTime = fin - debut;
-      const diffJours = Math.abs(diffTime / (1000 * 60 * 60 * 24));
-
-      document.getElementById("resultat").innerText =
-        `Il s'est écoulé ${diffJours} jour(s).`;
+<script>
+  function remplirSelect(id, debut, fin) {
+    let s = document.getElementById(id);
+    for (let i = debut; i <= fin; i++) {
+      let o = document.createElement("option");
+      o.value = i;
+      o.text = i;
+      s.appendChild(o);
     }
-  </script>
-</body>
-</html>
+  }
+
+  function remplirMois(id) {
+    const mois = ["Janvier","Février","Mars","Avril","Mai","Juin",
+                  "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+    let s = document.get
