@@ -2,10 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Calcul entre deux dates</title>
+<title>Nombre de jours entre deux dates</title>
+
 <style>
 body { font-family: Arial; background:#fff8cc; }
-.box { background:#eaffd0; padding:15px; width:520px; border:1px solid green; }
+.box {
+  background:#eaffd0;
+  padding:15px;
+  width:700px;
+  border:2px solid green;
+}
 select, button { margin:4px; }
 </style>
 </head>
@@ -13,6 +19,7 @@ select, button { margin:4px; }
 <body>
 
 <h2>Nombre de jours entre deux dates</h2>
+<p>Ce calculateur permet de connaître l’intervalle exact entre deux dates.</p>
 
 <div class="box">
 <b>Date de début :</b><br>
@@ -30,39 +37,66 @@ Année <select id="a2"></select>
 <br><br>
 <button onclick="calculer()">Calculer</button>
 
-<p id="res"></p>
+<p id="res" style="margin-top:15px;font-weight:bold;"></p>
 </div>
 
 <script>
-function remplir(id,min,max){
-  let s=document.getElementById(id);
-  for(let i=min;i<=max;i++){
-    let o=document.createElement("option");
-    o.value=i; o.text=i;
+const moisNoms = [
+  "Janvier","Février","Mars","Avril","Mai","Juin",
+  "Juillet","Août","Septembre","Octobre","Novembre","Décembre"
+];
+
+function remplir(id, min, max) {
+  let s = document.getElementById(id);
+  for (let i = min; i <= max; i++) {
+    let o = document.createElement("option");
+    o.value = i;
+    o.text = i;
     s.appendChild(o);
   }
 }
 
-function mois(id){
-  let m=["Janvier","Février","Mars","Avril","Mai","Juin",
-         "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-  let s=document.getElementById(id);
-  m.forEach((v,i)=>{
-    let o=document.createElement("option");
-    o.value=i; o.text=v;
+function remplirMois(id) {
+  let s = document.getElementById(id);
+  moisNoms.forEach((m, i) => {
+    let o = document.createElement("option");
+    o.value = i;
+    o.text = m;
     s.appendChild(o);
   });
 }
 
-remplir("j1",1,31); remplir("j2",1,31);
-remplir("a1",2000,2035); remplir("a2",2000,2035);
-mois("m1"); mois("m2");
+/* 🔹 ANNÉES SANS LIMITE (1900 → 2100) */
+remplir("a1", 1900, 2100);
+remplir("a2", 1900, 2100);
 
-function calculer(){
-  let d1=new Date(a1.value,m1.value,j1.value);
-  let d2=new Date(a2.value,m2.value,j2.value);
-  let j=Math.abs((d2-d1)/(1000*60*60*24));
-  res.innerText="Il s'est écoulé "+j+" jour(s).";
+remplir("j1", 1, 31);
+remplir("j2", 1, 31);
+remplirMois("m1");
+remplirMois("m2");
+
+function calculer() {
+  let d1 = new Date(a1.value, m1.value, j1.value);
+  let d2 = new Date(a2.value, m2.value, j2.value);
+
+  if (d2 < d1) {
+    res.innerText = "La date de fin doit être après la date de début.";
+    return;
+  }
+
+  let diffJours = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+  let diffAnnees = Math.floor(diffJours / 365.25);
+
+  let txt =
+    "Entre le " +
+    j1.value + " " + moisNoms[m1.value] + " " + a1.value +
+    " et le " +
+    j2.value + " " + moisNoms[m2.value] + " " + a2.value +
+    ", il s'est écoulé " +
+    diffJours + " jours soit " +
+    diffAnnees + " ans.";
+
+  res.innerText = txt;
 }
 </script>
 
