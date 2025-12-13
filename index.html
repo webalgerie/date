@@ -5,26 +5,20 @@
 <title>Calcul entre deux dates</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #fff8cc;
-}
-
+body { font-family: Arial; background:#fff8cc; }
 .box {
-  background: #eaffd0;
-  padding: 15px;
-  width: 700px;
-  border: 2px solid green;
+  background:#eaffd0;
+  padding:15px;
+  width:820px;
+  border:2px solid green;
 }
-
-select, button {
-  margin: 4px;
-}
-
-#res {
-  margin-top: 15px;
-  font-weight: bold;
-  line-height: 1.6;
+select, input, button { margin:4px; }
+#res { margin-top:15px; font-weight:bold; line-height:1.7; }
+.ferie {
+  background:#fff;
+  border:1px solid #aaa;
+  padding:5px;
+  margin:3px 0;
 }
 </style>
 </head>
@@ -32,32 +26,39 @@ select, button {
 <body>
 
 <h2>Nombre de jours entre deux dates</h2>
-<p>
-Cet outil permet de calculer l’intervalle entre deux dates.
-</p>
 
 <div class="box">
 
 <b>Date de début :</b><br>
-Jour
-<select id="j1"></select>
-Mois
-<select id="m1"></select>
-Année
-<select id="a1"></select>
+Jour <select id="j1"></select>
+Mois <select id="m1"></select>
+Année <select id="a1"></select>
 
 <br><br>
 
 <b>Date de fin :</b><br>
-Jour
-<select id="j2"></select>
-Mois
-<select id="m2"></select>
-Année
-<select id="a2"></select>
+Jour <select id="j2"></select>
+Mois <select id="m2"></select>
+Année <select id="a2"></select>
 
-<br><br>
+<hr>
 
+<b>Paramètres de travail :</b><br>
+Heures par jour :
+<input type="number" id="hJour" value="8" min="1" max="24"> h<br>
+
+<input type="checkbox" id="samedi" checked> Exclure samedi  
+<input type="checkbox" id="dimanche" checked> Exclure dimanche  
+
+<hr>
+
+<b>Jours fériés personnalisés :</b><br>
+<input type="date" id="ferieInput">
+<button onclick="ajouterFerie()">Ajouter</button>
+
+<div id="listeFeries"></div>
+
+<br>
 <button onclick="calculer()">Calculer</button>
 
 <p id="res"></p>
@@ -65,13 +66,15 @@ Année
 </div>
 
 <script>
-// ---------------- DONNÉES ----------------
+// ---------- DONNÉES ----------
 const moisNoms = [
   "Janvier","Février","Mars","Avril","Mai","Juin",
   "Juillet","Août","Septembre","Octobre","Novembre","Décembre"
 ];
 
-// ---------------- REMPLISSAGE ----------------
+let joursFeries = [];
+
+// ---------- OUTILS ----------
 function remplirSelect(id, min, max, valeur=null) {
   const s = document.getElementById(id);
   s.innerHTML = "";
@@ -95,43 +98,87 @@ function remplirMois(id) {
   });
 }
 
-// ---------------- INITIALISATION ----------------
+function afficherFeries() {
+  const div = document.getElementById("listeFeries");
+  div.innerHTML = "";
+  joursFeries.forEach((f, i) => {
+    div.innerHTML +=
+      "<div class='ferie'>" +
+      f +
+      " <button onclick='supprimerFerie(" + i + ")'>❌</button></div>";
+  });
+}
+
+function ajouterFerie() {
+  const val = ferieInput.value;
+  if (val && !joursFeries.includes(val)) {
+    joursFeries.push(val);
+    afficherFeries();
+    ferieInput.value = "";
+  }
+}
+
+function supprimerFerie(i) {
+  joursFeries.splice(i, 1);
+  afficherFeries();
+}
+
+// ---------- INITIALISATION ----------
 const anneeActuelle = new Date().getFullYear();
 
-remplirSelect("j1", 1, 31);
-remplirSelect("j2", 1, 31);
-
+remplirSelect("j1",1,31);
+remplirSelect("j2",1,31);
 remplirMois("m1");
 remplirMois("m2");
+remplirSelect("a1",1900,anneeActuelle+50,anneeActuelle);
+remplirSelect("a2",1900,anneeActuelle+50,anneeActuelle);
 
-/* Années sans limite à 2000 */
-remplirSelect("a1", 1900, anneeActuelle + 50, anneeActuelle);
-remplirSelect("a2", 1900, anneeActuelle + 50, anneeActuelle);
-
-// ---------------- CALCUL ----------------
+// ---------- CALCUL ----------
 function calculer() {
 
   const d1 = new Date(a1.value, m1.value, j1.value);
   const d2 = new Date(a2.value, m2.value, j2.value);
 
   if (d2 < d1) {
-    res.innerText = "La date de fin doit être postérieure à la date de début.";
+    res.innerText = "La date de fin doit être après la date de début.";
     return;
   }
 
-  const diffJours = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-  const diffMois = Math.floor(diffJours / 30.4375);   // moyenne
-  const diffAnnees = Math.floor(diffJours / 365.25); // moyenne
+  let joursOuvres = 0;
+  let courant = new Date(d1);
+
+  while (courant <= d2) {
+    const jour = courant.getDay(); // 0 dim, 6 sam
+    const dateISO = courant.toISOString().split("T")[0];
+
+    let estWeekend =
+      (jour === 6 && samedi.checked) ||
+      (jour === 0 && dimanche.checked);
+
+    let estFerie = joursFeries.includes(dateISO);
+
+    if (!estWeekend && !estFerie) {
+      joursOuvres++;
+    }
+
+    courant.setDate(courant.getDate() + 1);
+  }
+
+  const heuresParJour = Number(hJour.value);
+  const totalHeures = joursOuvres * heuresParJour;
+
+  const diffJours = Math.floor((d2 - d1) / (1000*60*60*24));
+  const diffMois = Math.floor(diffJours / 30.4375);
+  const diffAnnees = Math.floor(diffJours / 365.25);
 
   res.innerHTML =
-    "Entre le " +
-    j1.value + " " + moisNoms[m1.value] + " " + a1.value +
-    " et le " +
-    j2.value + " " + moisNoms[m2.value] + " " + a2.value +
-    " :<br><br>" +
+    "Entre le " + j1.value + " " + moisNoms[m1.value] + " " + a1.value +
+    " et le " + j2.value + " " + moisNoms[m2.value] + " " + a2.value + " :<br><br>" +
     "➡️ <b>" + diffJours + "</b> jours<br>" +
     "➡️ <b>" + diffMois + "</b> mois<br>" +
-    "➡️ <b>" + diffAnnees + "</b> années";
+    "➡️ <b>" + diffAnnees + "</b> années<br>" +
+    "➡️ <b>" + totalHeures + "</b> heures de travail<br>" +
+    "( " + joursOuvres + " jours ouvrés × " + heuresParJour + " h )";
 }
 </script>
 
