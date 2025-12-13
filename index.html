@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Nombre de jours entre deux dates</title>
+<title>Calcul entre deux dates</title>
 
 <style>
 body {
@@ -24,6 +24,7 @@ select, button {
 #res {
   margin-top: 15px;
   font-weight: bold;
+  line-height: 1.6;
 }
 </style>
 </head>
@@ -103,24 +104,15 @@ remplirSelect("j2", 1, 31);
 remplirMois("m1");
 remplirMois("m2");
 
-/* 🔴 ANNÉES NON LIMITÉES */
+/* Années sans limite à 2000 */
 remplirSelect("a1", 1900, anneeActuelle + 50, anneeActuelle);
 remplirSelect("a2", 1900, anneeActuelle + 50, anneeActuelle);
 
 // ---------------- CALCUL ----------------
 function calculer() {
 
-  const d1 = new Date(
-    document.getElementById("a1").value,
-    document.getElementById("m1").value,
-    document.getElementById("j1").value
-  );
-
-  const d2 = new Date(
-    document.getElementById("a2").value,
-    document.getElementById("m2").value,
-    document.getElementById("j2").value
-  );
+  const d1 = new Date(a1.value, m1.value, j1.value);
+  const d2 = new Date(a2.value, m2.value, j2.value);
 
   if (d2 < d1) {
     res.innerText = "La date de fin doit être postérieure à la date de début.";
@@ -128,16 +120,18 @@ function calculer() {
   }
 
   const diffJours = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-  const diffAnnees = Math.floor(diffJours / 365.25);
+  const diffMois = Math.floor(diffJours / 30.4375);   // moyenne
+  const diffAnnees = Math.floor(diffJours / 365.25); // moyenne
 
-  res.innerText =
+  res.innerHTML =
     "Entre le " +
     j1.value + " " + moisNoms[m1.value] + " " + a1.value +
     " et le " +
     j2.value + " " + moisNoms[m2.value] + " " + a2.value +
-    ", il s'est écoulé " +
-    diffJours + " jours soit " +
-    diffAnnees + " ans.";
+    " :<br><br>" +
+    "➡️ <b>" + diffJours + "</b> jours<br>" +
+    "➡️ <b>" + diffMois + "</b> mois<br>" +
+    "➡️ <b>" + diffAnnees + "</b> années";
 }
 </script>
 
