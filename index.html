@@ -9,17 +9,12 @@ body { font-family: Arial; background:#fff8cc; }
 .box {
   background:#eaffd0;
   padding:15px;
-  width:820px;
+  width:860px;
   border:2px solid green;
 }
 select, input, button { margin:4px; }
 #res { margin-top:15px; font-weight:bold; line-height:1.7; }
-.ferie {
-  background:#fff;
-  border:1px solid #aaa;
-  padding:5px;
-  margin:3px 0;
-}
+.ferie { background:#fff; border:1px solid #aaa; padding:5px; margin:3px 0; }
 </style>
 </head>
 
@@ -52,6 +47,12 @@ Heures par jour :
 
 <hr>
 
+<b>Jours fériés :</b><br>
+<input type="checkbox" id="feriesDZ" checked>
+Utiliser les jours fériés officiels (Algérie 🇩🇿)
+
+<br><br>
+
 <b>Jours fériés personnalisés :</b><br>
 <input type="date" id="ferieInput">
 <button onclick="ajouterFerie()">Ajouter</button>
@@ -72,9 +73,24 @@ const moisNoms = [
   "Juillet","Août","Septembre","Octobre","Novembre","Décembre"
 ];
 
-let joursFeries = [];
+// Jours fériés fixes ALGÉRIE (MM-JJ)
+const feriesAlgerie = [
+  "01-01", // Jour de l'An
+  "01-12", // Yennayer
+  "05-01", // Fête du Travail
+  "07-05", // Indépendance
+  "11-01"  // Révolution
+];
+
+let feriesPerso = [];
 
 // ---------- OUTILS ----------
+function estFerieAlgerie(date) {
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const jj = String(date.getDate()).padStart(2, "0");
+  return feriesAlgerie.includes(mm + "-" + jj);
+}
+
 function remplirSelect(id, min, max, valeur=null) {
   const s = document.getElementById(id);
   s.innerHTML = "";
@@ -99,27 +115,24 @@ function remplirMois(id) {
 }
 
 function afficherFeries() {
-  const div = document.getElementById("listeFeries");
-  div.innerHTML = "";
-  joursFeries.forEach((f, i) => {
-    div.innerHTML +=
-      "<div class='ferie'>" +
-      f +
+  listeFeries.innerHTML = "";
+  feriesPerso.forEach((f, i) => {
+    listeFeries.innerHTML +=
+      "<div class='ferie'>" + f +
       " <button onclick='supprimerFerie(" + i + ")'>❌</button></div>";
   });
 }
 
 function ajouterFerie() {
-  const val = ferieInput.value;
-  if (val && !joursFeries.includes(val)) {
-    joursFeries.push(val);
+  if (ferieInput.value && !feriesPerso.includes(ferieInput.value)) {
+    feriesPerso.push(ferieInput.value);
     afficherFeries();
     ferieInput.value = "";
   }
 }
 
 function supprimerFerie(i) {
-  joursFeries.splice(i, 1);
+  feriesPerso.splice(i, 1);
   afficherFeries();
 }
 
@@ -149,15 +162,16 @@ function calculer() {
 
   while (courant <= d2) {
     const jour = courant.getDay(); // 0 dim, 6 sam
-    const dateISO = courant.toISOString().split("T")[0];
+    const iso = courant.toISOString().split("T")[0];
 
-    let estWeekend =
+    let weekend =
       (jour === 6 && samedi.checked) ||
       (jour === 0 && dimanche.checked);
 
-    let estFerie = joursFeries.includes(dateISO);
+    let ferieDZ = feriesDZ.checked && estFerieAlgerie(courant);
+    let feriePerso = feriesPerso.includes(iso);
 
-    if (!estWeekend && !estFerie) {
+    if (!weekend && !ferieDZ && !feriePerso) {
       joursOuvres++;
     }
 
